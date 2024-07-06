@@ -1,11 +1,16 @@
+// src/pages/Login.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container, CssBaseline, Box } from '@mui/material';
 import AuthForm from '../components/AuthForm';
 import { auth, googleProvider } from '../firebaseConfig';
 import { signInWithPopup } from 'firebase/auth';
 import axios from 'axios';
+import config from '../config';
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const handleLogin = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -13,12 +18,14 @@ const Login = () => {
     const password = data.get('password');
 
     try {
-      const response = await axios.post('http://192.168.1.15:8000/api/login', {
+      const response = await axios.post(`${config.apiBaseUrl}/api/login`, {
         email: email,
         password: password
       });
       console.log('Login record saved:', response.data);
+      localStorage.setItem('access_token', response.data.access_token);
       console.log('User is logged in');
+      navigate('/home');
     } catch (error) {
       console.error('Login error:', error);
     }
@@ -29,11 +36,14 @@ const Login = () => {
       const result = await signInWithPopup(auth, googleProvider);
       console.log('Google login successful:', result.user);
 
-      const response = await axios.post('http://192.168.1.15:8000/api/login', {
+      const response = await axios.post(`${config.apiBaseUrl}/api/google_register`, {
+        displayName: result.user.displayName,
         email: result.user.email
       });
-      console.log('Login record saved:', response.data);
+      console.log('Google login record saved:', response.data);
+      localStorage.setItem('access_token', response.data.token);
       console.log('User is logged in');
+      navigate('/home');
     } catch (error) {
       console.error('Google login error:', error);
     }

@@ -41,18 +41,16 @@ const AuthForm = ({ type, handleSubmit, handleGoogleLogin }) => {
       <Typography variant="h5" sx={{ mb: 3 }}>
         {type === 'login' ? 'Welcome back' : 'Sign up'}
       </Typography>
-      {type === 'register' && (
-        <Button
-          variant="contained"
-          color="secondary"
-          startIcon={<GoogleIcon />}
-          onClick={handleGoogleLogin}
-          fullWidth
-          sx={{ mt: 3, mb: 2, py: 1.5 }}
-        >
-          Sign up with Google
-        </Button>
-      )}
+      <Button
+        variant="contained"
+        color="secondary"
+        startIcon={<GoogleIcon />}
+        onClick={handleGoogleLogin}
+        fullWidth
+        sx={{ mt: 3, mb: 2, py: 1.5 }}
+      >
+        {type === 'login' ? 'Login with Google' : 'Sign up with Google'}
+      </Button>
       <TextField 
         margin="normal" 
         required 
@@ -90,6 +88,7 @@ const AuthForm = ({ type, handleSubmit, handleGoogleLogin }) => {
             fullWidth 
             label="Last Name" 
             name="last_name" 
+            onChange={handleInitialsChange}
             sx={{ mb: 2 }} 
           />
           <TextField 

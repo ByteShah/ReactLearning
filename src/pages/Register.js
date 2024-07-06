@@ -1,12 +1,16 @@
 // src/pages/Register.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container, CssBaseline, Box } from '@mui/material';
 import AuthForm from '../components/AuthForm';
 import { auth, googleProvider } from '../firebaseConfig';
 import { signInWithPopup } from 'firebase/auth';
 import axios from 'axios';
+import config from '../config';
 
 const Register = () => {
+  const navigate = useNavigate();
+
   const handleRegister = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -16,11 +20,12 @@ const Register = () => {
     const userName = data.get('user_name');
     const email = data.get('email');
     const password = data.get('password');
-    const avatarColor = data.get('avatarColor') || '#ff5722';
+    const avatarColor = data.get('avatarColor') || '#ff5722'; // default color
     const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
     try {
-      const response = await axios.post('http://192.168.1.15:8000/api/register', {
+      // Send registration data to Laravel API
+      const response = await axios.post(`${config.apiBaseUrl}/api/register`, {
         first_name: firstName,
         last_name: lastName,
         mobile_number: mobileNumber,
@@ -31,7 +36,9 @@ const Register = () => {
         initials: initials
       });
       console.log('Registration record saved:', response.data);
+      localStorage.setItem('access_token', response.data.access_token);
       console.log('User is registered and logged in');
+      navigate('/home');
     } catch (error) {
       console.error('Registration error:', error);
     }
@@ -41,25 +48,15 @@ const Register = () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       console.log('Google login successful:', result.user);
-      
-      const user = result.user;
-      const firstName = user.displayName.split(' ')[0];
-      const lastName = user.displayName.split(' ')[1];
-      const email = user.email;
-      const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
-      const response = await axios.post('http://192.168.1.15:8000/api/register', {
-        first_name: firstName,
-        last_name: lastName,
-        mobile_number: '',
-        user_name: user.displayName,
-        email: email,
-        password: '',
-        avatar_color: '',
-        initials: initials
+      const response = await axios.post(`${config.apiBaseUrl}/api/google_register`, {
+        displayName: result.user.displayName,
+        email: result.user.email
       });
-      console.log('Registration record saved:', response.data);
+      console.log('Google registration record saved:', response.data);
+      localStorage.setItem('access_token', response.data.access_token);
       console.log('User is registered and logged in');
+      navigate('/home');
     } catch (error) {
       console.error('Google login error:', error);
     }
